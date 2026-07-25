@@ -1,1 +1,43 @@
-git
+ *{
+      box-sizing: border-box;
+      padding: 0px;
+      margin: 0px;
+    }
+    #container{
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 20px;
+    }
+    .movie > img{
+      width: 100%;
+      max-height: 300px;
+    }
+    .movie{
+      height: 500px;
+      border: 1px solid gray;
+      border-radius: 10px;
+      padding: 20px;
+    }
+    button{
+      background-color: red;
+      color: white;
+      font-size: 20px;
+      border-radius: 20px;
+      border: none;
+      padding: 10px;
+      margin-right: 20px;
+    }
+    #navbar{
+      background-color: bisque;
+      height: 100px;
+      width: 100%;
+      display: flex;
+      justify-content: space-around;
+    }
+    #navbar > a{
+      font-size: 40px;
+    }
+    p{
+      font-size: 20px;
+      line-height: 30px;
+    }

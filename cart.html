@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <style>
+    #navbar{
+      background-color: bisque;
+      height: 100px;
+      width: 100%;
+      display: flex;
+      justify-content: space-around;
+    }
+    #navbar > a{
+      font-size: 40px;
+    }
+  </style>
+</head>
+<body>
+  <div id="navbar">
+    <a href="./index.html">HOME</a>
+    <a href="./cart.html">CART</a>
+  </div>
+
+
+  <h1>my cart</h1>
+  <h1 id="total">Total : </h1>
+  <div id="container">
+
+  </div>
+</body>
+<script>
+  let data = JSON.parse(localStorage.getItem("cart"));
+  console.log(data);
+
+  function createCard(movie) {
+  let card = document.createElement("div");
+  card.setAttribute("class", "movie");
+  let movieImage = document.createElement("img");
+  movieImage.setAttribute("src", movie.image)
+  let movieName = document.createElement("h2");
+  movieName.innerText = movie.movieName;
+  let ageLimit = document.createElement("p");
+  ageLimit.innerText = movie.ageLimit;
+  let language = document.createElement("p");
+  language.innerText = movie.language;
+  let price = document.createElement("p");
+  price.innerText = `price : ${movie.price}`
+
+
+  card.append(movieImage, movieName, ageLimit, language,price);
+  container.append(card);
+}
+
+let total = data.reduce((prev, curr)=>{
+  return prev = prev + curr.price;
+}, 0)
+console.log(total)
+let price = document.getElementById("total");
+price.innerText = `Total of your cart : ${total}`;
+
+for(let i=0; i<data.length; i++){
+  createCard(data[i]);
+}
+</script>
+</html>
