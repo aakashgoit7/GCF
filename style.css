@@ -30,17 +30,149 @@
       padding: 10px;
       margin-right: 20px;
     }
-    #navbar{
-      background-color: bisque;
-      height: 100px;
-      width: 100%;
-      display: flex;
-      justify-content: space-around;
-    }
-    #navbar > a{
-      font-size: 40px;
-    }
+   
     p{
       font-size: 20px;
       line-height: 30px;
     }
+
+    @import url('https://fonts.googleapis.com/css2?family=BJ+Cree:wght@400;500;600;700&family=Basic&display=swap');
+    *{
+        margin: 0px;
+        padding: 0px;
+        font-family: hell;
+    }
+    @font-face {
+        font-family: hell;
+        src: url(/NeueHaasGrotDisp-55Roman-Trial.otf);
+    }
+    header{
+        
+    background-color: rgb(234, 178, 24);
+    margin: auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 5px 10px;
+    
+    }
+    .logo{
+        margin-left: 20px;
+    }
+    p,h,a{
+        color: white;
+        font-size: 15px;
+    font-weight: 100;
+    text-decoration: none;
+    
+    
+    } 
+    nav>ul{
+        
+        display: flex;
+        gap: 20px;
+    }
+    nav>ul>li{
+      
+        list-style: none;
+       
+    }
+    .side-header>ul{
+      list-style: none;
+        display: flex;
+        gap: 20px;
+        align-items: center;
+    }
+    .side-header>ul>li{
+      list-style: none;
+    }
+    .s-icon{
+        width: 50px;
+        height: 50px;
+       
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 100%;
+
+    }
+    .s-icon:hover{
+        background-color: aqua;
+        transition: all .3s ease;
+    }
+.cart-box{
+     display:flex;
+    align-items:center;
+    gap:8px;
+    padding:10px 16px;
+    border:1px solid #d8d8d8;
+    border-radius:10px;
+    background-color:#fff;
+    font-size:15px;
+    font-weight:600;
+    color:#222;
+    cursor:pointer;
+    HEIGHT: 30px;
+}
+
+    .location-box{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    padding:10px 16px;
+    border:1px solid #d8d8d8;
+    border-radius:10px;
+    background:#fff;
+    font-size:15px;
+    font-weight:600;
+    color:#222;
+    cursor:pointer;
+    HEIGHT: 30px;
+}
+
+.location-box .fa-location-crosshairs{
+    font-size:17px;
+}
+
+.location-box .fa-angle-down{
+    font-size:13px;
+    color:#555;
+}
+
+.login-box{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    padding:10px 18px;
+    border-radius:10px;
+    background:#f8ebc7;
+    font-size:15px;
+    font-weight:600;
+    color:#111;
+    cursor:pointer;
+    height: 30px;
+}
+
+.user-icon{
+    width:28px;
+    height:28px;
+    border-radius:50%;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    color:#fff;
+    font-size:13px;
+    
+
+}
+.cart-icon{
+     width:28px;
+    height:28px;
+    border-radius:50%;
+    display:flex;
+    background-color:#f8ebc7;
+    justify-content:center;
+    align-items:center;
+    
+    
+}
