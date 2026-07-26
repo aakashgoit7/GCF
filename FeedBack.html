@@ -1,0 +1,644 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Service Quality Rating</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0f1117;
+    --card: #1a1d27;
+    --card-border: #2a2d3a;
+    --fg: #e8e9ed;
+    --muted: #6b7084;
+    --star-empty: #2e3142;
+    --star-fill: #f5c542;
+    --glow: rgba(245, 197, 66, 0.15);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Nunito', sans-serif;
+    background: var(--bg);
+    color: var(--fg);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+  }
+
+  /* Animated background blobs */
+  .blob {
+    position: fixed;
+    border-radius: 50%;
+    filter: blur(100px);
+    opacity: 0.3;
+    pointer-events: none;
+    animation: blobFloat 12s ease-in-out infinite alternate;
+  }
+  .blob-1 { width: 500px; height: 500px; background: #e85d4a; top: -150px; left: -100px; }
+  .blob-2 { width: 400px; height: 400px; background: #f5c542; bottom: -100px; right: -80px; animation-delay: -4s; }
+  .blob-3 { width: 300px; height: 300px; background: #4ae88a; top: 50%; left: 60%; animation-delay: -8s; }
+
+  @keyframes blobFloat {
+    0% { transform: translate(0, 0) scale(1); }
+    100% { transform: translate(40px, -30px) scale(1.15); }
+  }
+
+  .rating-container {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 32px;
+  }
+
+  .title {
+    font-size: 28px;
+    font-weight: 900;
+    letter-spacing: -0.5px;
+    text-align: center;
+  }
+  .title span {
+    color: var(--star-fill);
+  }
+
+  /* Face wrapper with glow */
+  .face-wrapper {
+    position: relative;
+    width: 220px;
+    height: 220px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  .face-wrapper:hover {
+    transform: scale(1.05);
+  }
+  .face-wrapper::before {
+    content: '';
+    position: absolute;
+    inset: -20px;
+    border-radius: 50%;
+    background: var(--glow);
+    transition: background 0.6s ease, inset 0.6s ease;
+    z-index: -1;
+  }
+  .face-wrapper[data-rating="1"]::before { background: rgba(232, 93, 74, 0.2); inset: -25px; }
+  .face-wrapper[data-rating="2"]::before { background: rgba(232, 160, 74, 0.18); inset: -22px; }
+  .face-wrapper[data-rating="3"]::before { background: rgba(245, 197, 66, 0.18); }
+  .face-wrapper[data-rating="4"]::before { background: rgba(122, 232, 74, 0.18); inset: -22px; }
+  .face-wrapper[data-rating="5"]::before { background: rgba(74, 232, 138, 0.25); inset: -30px; }
+
+  /* SVG Face */
+  .face-svg {
+    width: 200px;
+    height: 200px;
+    filter: drop-shadow(0 8px 24px rgba(0,0,0,0.4));
+  }
+  .face-bg {
+    transition: fill 0.5s ease;
+  }
+  .eye-left, .eye-right {
+    transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    transform-origin: center;
+  }
+  .mouth-path {
+    transition: d 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  .eyebrow-left, .eyebrow-right {
+    transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    transform-origin: center;
+  }
+  .cheek-left, .cheek-right {
+    transition: opacity 0.5s ease;
+  }
+  .sweat-drop {
+    transition: opacity 0.4s ease;
+  }
+  .sparkle {
+    transition: opacity 0.4s ease, transform 0.4s ease;
+    transform-origin: center;
+  }
+
+  /* Stars */
+  .stars {
+    display: flex;
+    gap: 12px;
+  }
+  .star-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 4px;
+    position: relative;
+    outline: none;
+  }
+  .star-btn:focus-visible {
+    outline: 2px solid var(--star-fill);
+    outline-offset: 4px;
+    border-radius: 4px;
+  }
+  .star-svg {
+    width: 44px;
+    height: 44px;
+    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), filter 0.3s ease;
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
+  }
+  .star-btn:hover .star-svg {
+    transform: scale(1.2);
+  }
+  .star-btn.active .star-svg {
+    transform: scale(1.15);
+    filter: drop-shadow(0 2px 12px rgba(245, 197, 66, 0.5));
+    animation: starPop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  @keyframes starPop {
+    0% { transform: scale(0.6); }
+    50% { transform: scale(1.3); }
+    100% { transform: scale(1.15); }
+  }
+  .star-fill-color {
+    transition: fill 0.3s ease;
+  }
+
+  /* Label */
+  .rating-label {
+    font-size: 20px;
+    font-weight: 700;
+    min-height: 30px;
+    text-align: center;
+    transition: color 0.4s ease;
+    letter-spacing: 0.3px;
+  }
+  .label-1 { color: #e85d4a; }
+  .label-2 { color: #e8a04a; }
+  .label-3 { color: #f5c542; }
+  .label-4 { color: #9ae84a; }
+  .label-5 { color: #4ae88a; }
+
+  .sub-label {
+    font-size: 14px;
+    color: var(--muted);
+    min-height: 20px;
+    text-align: center;
+    transition: opacity 0.3s ease;
+  }
+
+  /* Bounce animation for face on rating change */
+  @keyframes faceBounce {
+    0% { transform: scale(1) rotate(0deg); }
+    25% { transform: scale(1.08) rotate(-3deg); }
+    50% { transform: scale(0.95) rotate(2deg); }
+    75% { transform: scale(1.04) rotate(-1deg); }
+    100% { transform: scale(1) rotate(0deg); }
+  }
+  .face-bounce {
+    animation: faceBounce 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  /* Particles */
+  .particle-container {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 10;
+    overflow: hidden;
+  }
+  .particle {
+    position: absolute;
+    border-radius: 50%;
+    pointer-events: none;
+    animation: particleFly 1.2s ease-out forwards;
+  }
+  @keyframes particleFly {
+    0% { opacity: 1; transform: translate(0, 0) scale(1); }
+    100% { opacity: 0; transform: translate(var(--tx), var(--ty)) scale(0); }
+  }
+
+  /* Rating counter */
+  .rating-value {
+    font-size: 64px;
+    font-weight: 900;
+    line-height: 1;
+    transition: color 0.4s ease;
+    opacity: 0.12;
+    position: absolute;
+    top: -10px;
+    right: -50px;
+    pointer-events: none;
+  }
+
+  /* Subtle floating dots */
+  .dot-field {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 1;
+  }
+  .dot {
+    position: absolute;
+    width: 3px;
+    height: 3px;
+    border-radius: 50%;
+    background: rgba(245, 197, 66, 0.15);
+    animation: dotDrift 20s linear infinite;
+  }
+  @keyframes dotDrift {
+    0% { transform: translateY(100vh) scale(0); opacity: 0; }
+    10% { opacity: 1; }
+    90% { opacity: 1; }
+    100% { transform: translateY(-10vh) scale(1); opacity: 0; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .title { font-size: 22px; }
+    .face-svg { width: 160px; height: 160px; }
+    .face-wrapper { width: 180px; height: 180px; }
+    .star-svg { width: 36px; height: 36px; }
+    .stars { gap: 8px; }
+    .rating-value { font-size: 48px; right: -30px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Background elements -->
+<div class="blob blob-1"></div>
+<div class="blob blob-2"></div>
+<div class="blob blob-3"></div>
+<div class="dot-field" id="dotField"></div>
+<div class="particle-container" id="particles"></div>
+
+<main class="rating-container">
+  <h1 class="title">How was our <span>service</span>?</h1>
+
+  <div class="face-wrapper" id="faceWrapper" data-rating="0" aria-live="polite">
+    <svg class="face-svg" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <radialGradient id="faceGrad" cx="40%" cy="35%">
+          <stop offset="0%" id="faceGradStop1" stop-color="#FFE066"/>
+          <stop offset="100%" id="faceGradStop2" stop-color="#F5C542"/>
+        </radialGradient>
+        <filter id="innerShadow">
+          <feOffset dx="0" dy="2"/>
+          <feGaussianBlur stdDeviation="3" result="offset-blur"/>
+          <feComposite operator="out" in="SourceGraphic" in2="offset-blur" result="inverse"/>
+          <feFlood flood-color="#000" flood-opacity="0.1" result="color"/>
+          <feComposite operator="in" in="color" in2="inverse" result="shadow"/>
+          <feComposite operator="over" in="shadow" in2="SourceGraphic"/>
+        </filter>
+      </defs>
+
+      <!-- Face circle -->
+      <circle class="face-bg" cx="100" cy="100" r="90" fill="url(#faceGrad)" filter="url(#innerShadow)" stroke="#e6b530" stroke-width="2"/>
+
+      <!-- Cheeks -->
+      <circle class="cheek-left" cx="50" cy="115" r="14" fill="#FFB3B3" opacity="0"/>
+      <circle class="cheek-right" cx="150" cy="115" r="14" fill="#FFB3B3" opacity="0"/>
+
+      <!-- Eyebrows -->
+      <line class="eyebrow-left" x1="58" y1="60" x2="82" y2="60" stroke="#a08020" stroke-width="3.5" stroke-linecap="round"/>
+      <line class="eyebrow-right" x1="118" y1="60" x2="142" y2="60" stroke="#a08020" stroke-width="3.5" stroke-linecap="round"/>
+
+      <!-- Eyes -->
+      <ellipse class="eye-left" cx="70" cy="82" rx="8" ry="9" fill="#3d2c00"/>
+      <ellipse class="eye-right" cx="130" cy="82" rx="8" ry="9" fill="#3d2c00"/>
+
+      <!-- Eye shine -->
+      <circle class="eye-shine-left" cx="73" cy="79" r="3" fill="#fff" opacity="0.9"/>
+      <circle class="eye-shine-right" cx="133" cy="79" r="3" fill="#fff" opacity="0.9"/>
+
+      <!-- Mouth -->
+      <path class="mouth-path" d="M 65 120 Q 100 120 135 120" fill="none" stroke="#3d2c00" stroke-width="4" stroke-linecap="round"/>
+
+      <!-- Sweat drop (for 1-2 stars) -->
+      <g class="sweat-drop" opacity="0">
+        <path d="M 160 55 Q 164 45 160 38 Q 156 45 160 55Z" fill="#6cb4ee" opacity="0.8"/>
+      </g>
+
+      <!-- Sparkles (for 5 stars) -->
+      <g class="sparkle" style="opacity:0" transform="translate(30,40)">
+        <line x1="0" y1="-8" x2="0" y2="8" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
+        <line x1="-8" y1="0" x2="8" y2="0" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
+        <line x1="-5" y1="-5" x2="5" y2="5" stroke="#fff" stroke-width="1.5" stroke-linecap="round"/>
+        <line x1="5" y1="-5" x2="-5" y2="5" stroke="#fff" stroke-width="1.5" stroke-linecap="round"/>
+      </g>
+      <g class="sparkle" style="opacity:0" transform="translate(170,50) scale(0.7)">
+        <line x1="0" y1="-8" x2="0" y2="8" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
+        <line x1="-8" y1="0" x2="8" y2="0" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
+        <line x1="-5" y1="-5" x2="5" y2="5" stroke="#fff" stroke-width="1.5" stroke-linecap="round"/>
+        <line x1="5" y1="-5" x2="-5" y2="5" stroke="#fff" stroke-width="1.5" stroke-linecap="round"/>
+      </g>
+      <g class="sparkle" style="opacity:0" transform="translate(45,155) scale(0.6)">
+        <line x1="0" y1="-8" x2="0" y2="8" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
+        <line x1="-8" y1="0" x2="8" y2="0" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
+        <line x1="-5" y1="-5" x2="5" y2="5" stroke="#fff" stroke-width="1.5" stroke-linecap="round"/>
+        <line x1="5" y1="-5" x2="-5" y2="5" stroke="#fff" stroke-width="1.5" stroke-linecap="round"/>
+      </g>
+    </svg>
+    <div class="rating-value" id="ratingValue"></div>
+  </div>
+
+  <div class="stars" role="radiogroup" aria-label="Service rating from 1 to 5 stars">
+    <button class="star-btn" data-value="1" role="radio" aria-checked="false" aria-label="1 star - Terrible">
+      <svg class="star-svg" viewBox="0 0 48 48"><polygon class="star-fill-color" points="24,4 29.5,17.5 44,19 33,29 36,44 24,37 12,44 15,29 4,19 18.5,17.5" fill="var(--star-empty)"/></svg>
+    </button>
+    <button class="star-btn" data-value="2" role="radio" aria-checked="false" aria-label="2 stars - Poor">
+      <svg class="star-svg" viewBox="0 0 48 48"><polygon class="star-fill-color" points="24,4 29.5,17.5 44,19 33,29 36,44 24,37 12,44 15,29 4,19 18.5,17.5" fill="var(--star-empty)"/></svg>
+    </button>
+    <button class="star-btn" data-value="3" role="radio" aria-checked="false" aria-label="3 stars - Okay">
+      <svg class="star-svg" viewBox="0 0 48 48"><polygon class="star-fill-color" points="24,4 29.5,17.5 44,19 33,29 36,44 24,37 12,44 15,29 4,19 18.5,17.5" fill="var(--star-empty)"/></svg>
+    </button>
+    <button class="star-btn" data-value="4" role="radio" aria-checked="false" aria-label="4 stars - Good">
+      <svg class="star-svg" viewBox="0 0 48 48"><polygon class="star-fill-color" points="24,4 29.5,17.5 44,19 33,29 36,44 24,37 12,44 15,29 4,19 18.5,17.5" fill="var(--star-empty)"/></svg>
+    </button>
+    <button class="star-btn" data-value="5" role="radio" aria-checked="false" aria-label="5 stars - Excellent">
+      <svg class="star-svg" viewBox="0 0 48 48"><polygon class="star-fill-color" points="24,4 29.5,17.5 44,19 33,29 36,44 24,37 12,44 15,29 4,19 18.5,17.5" fill="var(--star-empty)"/></svg>
+    </button>
+  </div>
+
+  <div class="rating-label" id="ratingLabel" aria-live="polite">Tap a star to rate</div>
+  <div class="sub-label" id="subLabel"></div>
+</main>
+
+<script>
+  // Rating data for each level
+  const ratingData = {
+    0: { label: 'Tap a star to rate', sub: '', color: 'var(--muted)' },
+    1: {
+      label: 'Terrible',
+      sub: 'We completely let you down',
+      color: '#e85d4a',
+      face: { stop1: '#E8A0A0', stop2: '#D47373' },
+      mouth: 'M 68 130 Q 100 105 132 130',
+      eyeRX: 9, eyeRY: 5, eyeCY: 88,
+      browLeft: { x1: 55, y1: 55, x2: 82, y2: 62 },
+      browRight: { x1: 118, y1: 62, x2: 145, y2: 55 },
+      cheekOpacity: 0,
+      sweatOpacity: 0.9,
+      sparkleOpacity: 0,
+      shineOpacity: 0.3
+    },
+    2: {
+      label: 'Poor',
+      sub: 'Below expectations, sorry about that',
+      color: '#e8a04a',
+      face: { stop1: '#F0D080', stop2: '#D4B050' },
+      mouth: 'M 70 125 Q 100 115 130 125',
+      eyeRX: 8, eyeRY: 7, eyeCY: 85,
+      browLeft: { x1: 57, y1: 57, x2: 82, y2: 61 },
+      browRight: { x1: 118, y1: 61, x2: 143, y2: 57 },
+      cheekOpacity: 0,
+      sweatOpacity: 0.5,
+      sparkleOpacity: 0,
+      shineOpacity: 0.5
+    },
+    3: {
+      label: 'Okay',
+      sub: 'It was alright, room to improve',
+      color: '#f5c542',
+      face: { stop1: '#FFE066', stop2: '#F5C542' },
+      mouth: 'M 68 120 Q 100 120 132 120',
+      eyeRX: 8, eyeRY: 9, eyeCY: 82,
+      browLeft: { x1: 58, y1: 60, x2: 82, y2: 60 },
+      browRight: { x1: 118, y1: 60, x2: 142, y2: 60 },
+      cheekOpacity: 0,
+      sweatOpacity: 0,
+      sparkleOpacity: 0,
+      shineOpacity: 0.9
+    },
+    4: {
+      label: 'Good',
+      sub: 'Solid experience, glad you enjoyed it',
+      color: '#9ae84a',
+      face: { stop1: '#FFE880', stop2: '#F0D84A' },
+      mouth: 'M 68 115 Q 100 140 132 115',
+      eyeRX: 8, eyeRY: 9, eyeCY: 80,
+      browLeft: { x1: 58, y1: 58, x2: 82, y2: 54 },
+      browRight: { x1: 118, y1: 54, x2: 142, y2: 58 },
+      cheekOpacity: 0.5,
+      sweatOpacity: 0,
+      sparkleOpacity: 0,
+      shineOpacity: 0.9
+    },
+    5: {
+      label: 'Excellent',
+      sub: 'Outstanding! We love serving you',
+      color: '#4ae88a',
+      face: { stop1: '#FFF0A0', stop2: '#FFE050' },
+      mouth: 'M 60 110 Q 100 152 140 110',
+      eyeRX: 7, eyeRY: 10, eyeCY: 78,
+      browLeft: { x1: 58, y1: 56, x2: 82, y2: 50 },
+      browRight: { x1: 118, y1: 50, x2: 142, y2: 56 },
+      cheekOpacity: 0.8,
+      sweatOpacity: 0,
+      sparkleOpacity: 1,
+      shineOpacity: 1
+    }
+  };
+
+  // DOM elements
+  const faceWrapper = document.getElementById('faceWrapper');
+  const ratingLabel = document.getElementById('ratingLabel');
+  const subLabel = document.getElementById('subLabel');
+  const ratingValue = document.getElementById('ratingValue');
+  const starBtns = document.querySelectorAll('.star-btn');
+  const particleContainer = document.getElementById('particles');
+
+  // SVG elements
+  const faceGradStop1 = document.getElementById('faceGradStop1');
+  const faceGradStop2 = document.getElementById('faceGradStop2');
+  const eyeLeft = document.querySelector('.eye-left');
+  const eyeRight = document.querySelector('.eye-right');
+  const eyeShineLeft = document.querySelector('.eye-shine-left');
+  const eyeShineRight = document.querySelector('.eye-shine-right');
+  const mouthPath = document.querySelector('.mouth-path');
+  const browLeft = document.querySelector('.eyebrow-left');
+  const browRight = document.querySelector('.eyebrow-right');
+  const cheekLeft = document.querySelector('.cheek-left');
+  const cheekRight = document.querySelector('.cheek-right');
+  const sweatDrop = document.querySelector('.sweat-drop');
+  const sparkles = document.querySelectorAll('.sparkle');
+
+  let currentRating = 0;
+
+  // Set face expression based on rating value
+  function setFace(rating) {
+    const data = ratingData[rating];
+    if (!data) return;
+
+    // Face color
+    faceGradStop1.setAttribute('stop-color', data.face.stop1);
+    faceGradStop2.setAttribute('stop-color', data.face.stop2);
+
+    // Eyes - squint for 1 star (unhappy), bigger for 5 (happy)
+    eyeLeft.setAttribute('ry', data.eyeRY);
+    eyeLeft.setAttribute('rx', data.eyeRX);
+    eyeLeft.setAttribute('cy', data.eyeCY);
+    eyeRight.setAttribute('ry', data.eyeRY);
+    eyeRight.setAttribute('rx', data.eyeRX);
+    eyeRight.setAttribute('cy', data.eyeCY);
+
+    // Eye shine
+    eyeShineLeft.setAttribute('opacity', data.shineOpacity);
+    eyeShineRight.setAttribute('opacity', data.shineOpacity);
+
+    // Mouth - frown to smile
+    mouthPath.setAttribute('d', data.mouth);
+
+    // Eyebrows
+    browLeft.setAttribute('x1', data.browLeft.x1);
+    browLeft.setAttribute('y1', data.browLeft.y1);
+    browLeft.setAttribute('x2', data.browLeft.x2);
+    browLeft.setAttribute('y2', data.browLeft.y2);
+    browRight.setAttribute('x1', data.browRight.x1);
+    browRight.setAttribute('y1', data.browRight.y1);
+    browRight.setAttribute('x2', data.browRight.x2);
+    browRight.setAttribute('y2', data.browRight.y2);
+
+    // Cheeks
+    cheekLeft.setAttribute('opacity', data.cheekOpacity);
+    cheekRight.setAttribute('opacity', data.cheekOpacity);
+
+    // Sweat
+    sweatDrop.setAttribute('opacity', data.sweatOpacity);
+
+    // Sparkles
+    sparkles.forEach(s => s.style.opacity = data.sparkleOpacity);
+  }
+
+  // Update stars visual
+  function updateStars(rating) {
+    starBtns.forEach((btn, i) => {
+      const val = i + 1;
+      const fill = btn.querySelector('.star-fill-color');
+      if (val <= rating) {
+        fill.setAttribute('fill', 'var(--star-fill)');
+        btn.classList.add('active');
+        btn.setAttribute('aria-checked', 'true');
+      } else {
+        fill.setAttribute('fill', 'var(--star-empty)');
+        btn.classList.remove('active');
+        btn.setAttribute('aria-checked', 'false');
+      }
+    });
+  }
+
+  // Spawn particles on rating
+  function spawnParticles(color) {
+    const rect = faceWrapper.getBoundingClientRect();
+    const cx = rect.left + rect.width / 2;
+    const cy = rect.top + rect.height / 2;
+    const count = 18;
+
+    for (let i = 0; i < count; i++) {
+      const p = document.createElement('div');
+      p.className = 'particle';
+      const size = Math.random() * 8 + 4;
+      const angle = (Math.PI * 2 / count) * i + (Math.random() - 0.5) * 0.5;
+      const dist = Math.random() * 120 + 60;
+      const tx = Math.cos(angle) * dist;
+      const ty = Math.sin(angle) * dist;
+
+      p.style.width = size + 'px';
+      p.style.height = size + 'px';
+      p.style.left = cx + 'px';
+      p.style.top = cy + 'px';
+      p.style.background = color;
+      p.style.setProperty('--tx', tx + 'px');
+      p.style.setProperty('--ty', ty + 'px');
+      p.style.animationDuration = (0.6 + Math.random() * 0.6) + 's';
+      particleContainer.appendChild(p);
+
+      // Remove after animation
+      setTimeout(() => p.remove(), 1400);
+    }
+  }
+
+  // Handle rating selection
+  function selectRating(value) {
+    if (value === currentRating) return;
+    currentRating = value;
+    const data = ratingData[value];
+
+    faceWrapper.setAttribute('data-rating', value);
+    setFace(value);
+    updateStars(value);
+
+    ratingLabel.textContent = data.label;
+    ratingLabel.className = 'rating-label label-' + value;
+    subLabel.textContent = data.sub;
+
+    ratingValue.textContent = value;
+    ratingValue.style.color = data.color;
+
+    // Bounce animation
+    faceWrapper.classList.remove('face-bounce');
+    void faceWrapper.offsetWidth; // force reflow
+    faceWrapper.classList.add('face-bounce');
+
+    // Particles
+    spawnParticles(data.color);
+  }
+
+  // Star button events
+  starBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      selectRating(parseInt(btn.dataset.value));
+    });
+
+    // Hover preview
+    btn.addEventListener('mouseenter', () => {
+      const hoverVal = parseInt(btn.dataset.value);
+      const data = ratingData[hoverVal];
+      if (data) {
+        setFace(hoverVal);
+        // Update stars visually for hover
+        starBtns.forEach((b, i) => {
+          const fill = b.querySelector('.star-fill-color');
+          if (i < hoverVal) {
+            fill.setAttribute('fill', 'var(--star-fill)');
+          } else {
+            fill.setAttribute('fill', 'var(--star-empty)');
+          }
+        });
+      }
+    });
+  });
+
+  // Revert on mouse leave from stars area
+  document.querySelector('.stars').addEventListener('mouseleave', () => {
+    setFace(currentRating);
+    updateStars(currentRating);
+  });
+
+  // Generate floating dots
+  (function createDots() {
+    const field = document.getElementById('dotField');
+    for (let i = 0; i < 30; i++) {
+      const dot = document.createElement('div');
+      dot.className = 'dot';
+      dot.style.left = Math.random() * 100 + '%';
+      dot.style.animationDelay = -(Math.random() * 20) + 's';
+      dot.style.animationDuration = (15 + Math.random() * 15) + 's';
+      dot.style.opacity = Math.random() * 0.3 + 0.05;
+      dot.style.width = dot.style.height = (2 + Math.random() * 3) + 'px';
+      field.appendChild(dot);
+    }
+  })();
+</script>
+</body>
+</html>
