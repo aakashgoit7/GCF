@@ -4,6 +4,7 @@
       margin: 0px;
     }
     #container{
+      padding: 10px;
       display: grid;
       grid-template-columns: repeat(4, 1fr);
       gap: 20px;
@@ -11,9 +12,11 @@
     .movie > img{
       width: 100%;
       max-height: 300px;
+      width: 300px;
     }
     .movie{
       height: 500px;
+      width: 340px;
       border: 1px solid gray;
       border-radius: 10px;
       padding: 20px;

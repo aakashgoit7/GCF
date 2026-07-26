@@ -8,7 +8,7 @@ let data = [
   },
   {
     image: "https://assets-in.bmscdn.com/discovery-catalog/events/tr:w-400,h-600,bg-CCCCCC,e-usm-2-2-0.5-0.008:w-400.0,h-660.0,cm-pad_resize,bg-000000,fo-top:l-image,i-discovery-catalog@@icons@@like_202006280402.png,lx-24,ly-617,w-29,l-end:l-text,ie-ODM0SysgTGlrZXM%3D,fs-29,co-FFFFFF,ly-612,lx-70,pa-8_0_0_0,l-end/et00447840-xckkhurxjp-portrait.jpg",
-    movieName: "Spider-Man: Brand New Day",
+    movieName: " Brand New Day",
     ageLimit: "UA13+",
     language: "Hindi, English, Tamil, Telugu",
     price: 100
@@ -74,22 +74,12 @@ function createCard(movie) {
   let price = document.createElement("p");
   price.innerText = `price : ${movie.price}`
 
-  let viewMore = document.createElement("button");
-  viewMore.innerText = "VIEW MORE";
+  
 
   let addToCart = document.createElement("button");
   addToCart.innerText = "Add To Cart";
 
-  viewMore.addEventListener("click", ()=>{
-    console.log(movie);
-
-    console.log(JSON.stringify(movie));
-
-
-    localStorage.setItem("movie", JSON.stringify(movie));
-
-    window.location.href = "https://meet.google.com/home";
-  })
+  
 
   addToCart.addEventListener("click", ()=>{
     cart.push(movie);
@@ -97,7 +87,7 @@ function createCard(movie) {
     console.log(cart);
   })
 
-  card.append(movieImage, movieName, ageLimit, language,price, viewMore, addToCart);
+  card.append(movieImage, movieName, ageLimit, language,price, addToCart);
   container.append(card);
 }
 
