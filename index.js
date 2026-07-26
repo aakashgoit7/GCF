@@ -77,7 +77,7 @@ function createCard(movie) {
   
 
   let addToCart = document.createElement("button");
-  addToCart.innerText = "Add To Cart";
+  addToCart.innerText = "Book Now";
 
   
 
@@ -85,6 +85,11 @@ function createCard(movie) {
     cart.push(movie);
     localStorage.setItem("cart", JSON.stringify(cart));
     console.log(cart);
+    window.open(
+    'cart.html', 
+    '_blank', 
+    'width=600,height=400,scrollbars=yes,resizable=yes'
+  );
   })
 
   card.append(movieImage, movieName, ageLimit, language,price, addToCart);
