@@ -88,7 +88,6 @@ function createCard(movie) {
     window.open(
     'cart.html', 
     '_blank', 
-    'width=600,height=400,scrollbars=yes,resizable=yes'
   );
   })
 
